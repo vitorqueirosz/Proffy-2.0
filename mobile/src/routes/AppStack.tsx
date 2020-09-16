@@ -8,26 +8,37 @@ import Home from '../pages/Home';
 import Profile from '../pages/Profile';
 import GiveClasses from '../pages/GiveClasses';
 import StudyTabs from './TabNav';
+import { useAuth } from '../components/hooks/AuthContext';
 
 const { Navigator, Screen } = createStackNavigator();
 
-const Routes: React.FC = () => {
+const AppRoutes: React.FC = () => {
+
+    const { user } = useAuth();
+
   return (
-      <NavigationContainer>
-          <Navigator screenOptions={{
+
+    <NavigationContainer>
+      <Navigator screenOptions={{
               headerShown: false
-          }}>
-              <Screen name="SignIn" component={SignIn}/>
-              <Screen name="SignUp" component={SignUp}/>
-              <Screen name="PasswordSignUp" component={PasswordSignUp}/>
-              <Screen name="Home" component={Home}/>
-              <Screen name="Profile" component={Profile}/>
-              <Screen name="GiveClasses" component={GiveClasses}/>
-              <Screen name="study" component={StudyTabs}/>
-          </Navigator>
-      </NavigationContainer>
+          }}
+      >
+
+
+        {user ? <Screen name="Home" component={Home} /> : (
+          <Screen name="SignIn" component={SignIn} />
+     )}
+
+
+        <Screen name="SignUp" component={SignUp} />
+        <Screen name="PasswordSignUp" component={PasswordSignUp} />
+        <Screen name="Profile" component={Profile} />
+        <Screen name="GiveClasses" component={GiveClasses} />
+        <Screen name="study" component={StudyTabs} />
+      </Navigator>
+    </NavigationContainer>
 
   )
 }
 
-export default Routes;
+export default AppRoutes;

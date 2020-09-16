@@ -1,9 +1,11 @@
-import React, { useState } from "react";
+import React, { useCallback, useState } from "react";
 
 import { useNavigation } from "@react-navigation/native";
 import { KeyboardAvoidingView, Platform } from "react-native";
 import Input from "../../components/Input";
 import backgroundimg from "../../assets/images/background.png";
+
+import { useAuth } from "../../components/hooks/AuthContext";
 
 import {
     Container,
@@ -22,10 +24,31 @@ import {
     SubmitButtonText,
 } from "./styles";
 
+
 const SignIn: React.FC = () => {
-    const [name, setName] = useState<string>();
+    const [email, setEmail] = useState<string>();
     const [password, setPassword] = useState<string>();
     const navigation = useNavigation();
+
+    const { signIn } = useAuth();
+
+
+    const handleLogin = useCallback(
+        async () => {
+
+        try {
+
+            await signIn({
+                email,
+                password
+            });
+
+        } catch (error) {
+            console.log('error');
+        }
+
+
+    }, [signIn, email, password]);
 
     return (
       <>
@@ -48,8 +71,8 @@ const SignIn: React.FC = () => {
               </Header>
 
               <Input
-                value={name}
-                onChangeText={value => setName(value)}
+                value={email}
+                onChangeText={value => setEmail(value)}
                 placeholder="E-mail"
                 autoCorrect={false}
               />
@@ -75,7 +98,7 @@ const SignIn: React.FC = () => {
                 </ForgotPasswordInput>
               </BottomContent>
 
-              <SubmitButton>
+              <SubmitButton onPress={handleLogin}>
                 <SubmitButtonText>Entrar</SubmitButtonText>
               </SubmitButton>
             </Content>

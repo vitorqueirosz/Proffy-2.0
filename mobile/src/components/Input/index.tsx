@@ -7,12 +7,15 @@ import {
 
 import iconSeePassword from '../../assets/images/icons/seePassword.png';
 
+import iconLockPassword from '../../assets/images/icons/lockPassword.png';
+
 interface InputProps extends TextInputProperties {
     bottomInput?: boolean;
     iconPassword?: boolean;
     inputForm?: boolean;
     textArea?: boolean;
     shortInput?: boolean;
+    selectInput?: boolean;
 
 }
 
@@ -21,7 +24,7 @@ interface inputValueReference {
 }
 
 const Input: React.FC<InputProps> = ({
-  bottomInput, iconPassword, inputForm, textArea, shortInput, secureTextEntry, ...rest
+  bottomInput, iconPassword, inputForm, textArea, shortInput, selectInput, ...rest
 }) => {
   const [isFocused, setIsFocused] = useState(false);
   const [isFilled, setIsFilled] = useState(false);
@@ -49,6 +52,7 @@ const Input: React.FC<InputProps> = ({
       textArea={textArea}
       shortInput={shortInput}
       bottomInput={bottomInput}
+      selectInput={selectInput}
     >
       <TextInput
         onFocus={handleSetFocus}
@@ -60,7 +64,7 @@ const Input: React.FC<InputProps> = ({
 
       {iconPassword && (
       <ButtonSeePassword onPress={handleChangeTypeInput}>
-        <SeePasswordIcon source={iconSeePassword} />
+        <SeePasswordIcon source={inputType ? iconSeePassword : iconLockPassword} />
       </ButtonSeePassword>
       ) }
     </Container>

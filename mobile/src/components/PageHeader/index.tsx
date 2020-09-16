@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 
 import Icon from 'react-native-vector-icons/Feather';
 import { useNavigation } from '@react-navigation/native';
@@ -8,6 +8,7 @@ import logoImg from '../../assets/images/logo.png';
 import {
   Container, Header, PageTitle,Content, Title, SearchTeachers, Logo, ButtonSearchTeachers, SeachTeachersTitle, SearchContent
 } from './styles';
+import { useAuth } from '../hooks/AuthContext';
 
 interface PageHeaderProps {
     pageTitle: string;
@@ -20,6 +21,11 @@ const PageHeader: React.FC<PageHeaderProps> = ({
 }) => {
 
     const navigation = useNavigation();
+    const { handleVisibleFilter } = useAuth();
+
+    const handleToggleFilter = useCallback(() => {
+        handleVisibleFilter();
+    }, [handleVisibleFilter]);
 
     return (
       <Container>
@@ -41,7 +47,7 @@ const PageHeader: React.FC<PageHeaderProps> = ({
 
             {filter && (
             <SearchTeachers>
-              <ButtonSearchTeachers>
+              <ButtonSearchTeachers onPress={handleToggleFilter}>
                 <SearchContent>
                   <Icon name="filter" size={25} color="#04D361" />
 

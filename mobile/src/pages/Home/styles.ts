@@ -20,10 +20,15 @@ export const ProfileContent = styled.TouchableOpacity`
 `;
 export const ProfilePic = styled.Image`
     margin-right: 16px;
+    width: 100%;
+    border-radius: 25px;
+    max-width: 50px;
+    height: 50px;
 `;
 export const NameText = styled.Text`
     color: #D4C2FF;
     font-family: Poppins_400Regular;
+    font-size: 18px;
 `;
 export const LogoutButton = styled.TouchableOpacity`
     background: #774DD6;

@@ -1,22 +1,26 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 
-import Icon from 'react-native-vector-icons/Feather';
-
-import RNPickerSelect from 'react-native-picker-select';
-import { ScrollView } from 'react-native';
-import logoImg from '../../assets/images/landing.png';
+import { Platform, ScrollView } from 'react-native';
+import * as ImagePicker from 'expo-image-picker';
+import * as Permissions from 'expo-permissions';
+import camIcon from '../../assets/images/icons/camera.png';
+import profilePicture from '../../assets/images/profilePic.jpg';
 import Input from '../../components/Input';
 
+import PageHeader from '../../components/PageHeader';
+import api from '../../services/api';
 
+import { useAuth } from '../../components/hooks/AuthContext';
 
 import {
     Container,
-    Header,
-    HeaderTitle,
+    PickerItem,
+    Select,
     ContentTopTitle,
     GridInput,
     TopContent,
     ProfilePic,
+    ProfilePicData,
     NameTitle,
     Label,
     ProfileContent,
@@ -34,10 +38,12 @@ import {
     DeleteScheduleTitle,
     Footer,
     SubmitButton,
-    SubmitButtonText
+    SubmitButtonText,
+    SelectButtonImage,
+    ImageButtonSelect
 
  } from './styles';
-import PageHeader from '../../components/PageHeader';
+
 
 interface ScheduleItem {
     subject: string;
@@ -45,15 +51,76 @@ interface ScheduleItem {
     cost: number;
 }
 
+interface User {
+    id: string;
+    name: string;
+    avatar: string;
+    email: string;
+    whatsapp: string;
+    bio: string;
+}
+
+interface UpdatedUserData {
+    bio: string;
+}
+
+
 const Profile: React.FC = () => {
 
-    const [data, setData] = useState();
+    const { updateUserData, user } = useAuth();
+
+    const [data, setData] = useState({} as User);
     const [subject, setSubject] = useState('');
-    const [week_day, setWeekday] = useState('');
     const [cost, setCost] = useState('');
+    const [bio, setBio] = useState('');
+    const [avatar, setAvatar] = useState('');
+    const [hideAvatar, setHideAvatar] = useState(false);
     const [scheduleItems, setScheduleItems] = useState([{
         week_day: 0, from: '', to: ''
     }]);
+
+    useEffect(() => {
+        api.get('/users').then(response => {
+            const { user } = response.data;
+
+            setData(user);
+            setBio(user.bio);
+        });
+
+        console.log(bio);
+
+    }, [bio]);
+
+
+    const getPermissionAsync = async () => {
+        if (Platform.OS !== 'web') {
+            const { status } = await Permissions.askAsync(Permissions.CAMERA_ROLL);
+
+            if (status !== 'granted') {
+                alert('Sorry, we need camera roll permissions to make this work!')
+            }
+        }
+    };
+
+    const handleSelectProfilePic = useCallback( async () => {
+
+        await getPermissionAsync();
+
+
+            const result = await ImagePicker.launchImageLibraryAsync();
+
+            if (result.cancelled) {
+                return;
+            }
+
+            if (!result.uri) {
+              return;
+          }
+
+
+          setHideAvatar(true);
+          setAvatar(result.uri);
+    }, []);
 
 
     const handleAddNewSchedule = useCallback(() => {
@@ -66,24 +133,80 @@ const Profile: React.FC = () => {
         const filteredScheduleItem = scheduleItems.filter((_, position) => position !== index);
 
         setScheduleItems(filteredScheduleItem);
-    }, []);
+    }, [scheduleItems]);
+
+    const setScheduleItemValue = useCallback((index: number, field: string, value: string) => {
+        const updatedScheduleItem = scheduleItems.map((scheduleItem, position) => {
+            if (index === position) {
+                return {...scheduleItem, [field]: value};
+            }
+
+            return scheduleItem;
+        });
+
+        setScheduleItems(updatedScheduleItem);
+    }, [scheduleItems]);
+
+    const handleSubmit = useCallback( async () => {
+
+
+        // const classesData = {
+        //     subject,
+        //     scheduleItems,
+        //     cost
+        // };
+
+        // await api.post('/classes', classesData);
+
+        const formData = new FormData();
+
+        formData.append('bio', bio);
+
+        const avatarData = {
+            type: 'Image/jpeg',
+            uri: avatar,
+            name: `${user.id}.jpg`
+        }
+
+        formData.append('avatar', avatarData);
+
+        await api.patch('/users/profile', formData);
+
+        await updateUserData({
+            id: user.id,
+            name: user.name,
+            email: user.email,
+            avatar,
+            bio,
+            whatsapp: data.whatsapp,
+        });
+
+
+
+    }, [avatar, bio, subject, cost, scheduleItems]);
+
 
   return (
     <ScrollView>
       <Container>
-        {/* <Header>
-                <Icon name="arrow-left" size={20} color="#D4C2FF"/>
-
-                <HeaderTitle>Meu perfil</HeaderTitle>
-
-                <Logo source={logoImg}/>
-            </Header> */}
         <PageHeader pageTitle="Meu perfil">
 
           <TopContent>
-            <ProfilePic source={logoImg} />
+            {hideAvatar ? (
+              <ProfilePic source={{ uri: avatar }} />
+            )
+                :
+            (
+              <ProfilePicData
+                source={!data.avatar ? profilePicture :  { uri: `http://192.168.0.119:3333/files/${data.avatar}`}}
+              />
+            ) }
 
-            <NameTitle>Vitor Queiroz</NameTitle>
+            <SelectButtonImage onPress={handleSelectProfilePic}>
+              <ImageButtonSelect source={camIcon} />
+            </SelectButtonImage>
+
+            <NameTitle>{user.name}</NameTitle>
           </TopContent>
 
         </PageHeader>
@@ -95,48 +218,69 @@ const Profile: React.FC = () => {
             </ContentTopTitle>
 
             <Label>Nome</Label>
-            <Input placeholder="Nome" inputForm />
+            <Input
+              placeholder="Nome"
+              inputForm
+              value={user.name}
+            />
 
             <Label>E-mail</Label>
-            <Input placeholder="E-mail" inputForm />
+            <Input
+              placeholder="E-mail"
+              inputForm
+              value={user.email}
+            />
 
             <Label>Whatsapp</Label>
-            <Input placeholder="Whatsapp" inputForm />
+            <Input
+              placeholder="Whatsapp"
+              inputForm
+
+              value={user.whatsapp}
+            />
 
             <Label>Biografia</Label>
-            <Input textArea multiline numberOfLines={6} />
+            <Input
+              textArea
+              multiline
+              numberOfLines={6}
+              value={bio}
+              onChangeText={value => setBio(value)}
+            />
           </ProfileContent>
 
           <ClassesContent>
             <ContentTopTitle>
               <TopTitle>Sobre a aula</TopTitle>
             </ContentTopTitle>
-            {/* <RNPickerSelect
-                    onValueChange={(itemValue, itemIndex) =>
-                        setSubject(itemValue)
-                    }
-                    items={[
-                        { value: 'Artes', label: 'Artes'},
-                        { value: 'Historia', label: 'Historia'},
-                        { value: 'Matematica', label: 'Matematica'},
-                        { value: 'Ingles', label: 'Ingles'},
-                        { value: 'Portugues', label: 'Portugues'},
-                        { value: 'Geografia', label: 'Geografia'},
-                        { value: 'Biologia', label: 'Biologia'},
-                        { value: 'Fisica', label: 'Fisica'},
-                        { value: 'Quimica', label: 'Quimica'},
-                        { value: 'Educacao Fisica', label: 'Educacao Fisica'}
-                    ]}
-                    >
+            <Label>Materia</Label>
+            <PickerItem
 
-                    <Input
-                        placeholder="Qual a materia?"
-                        value={subject}
-                    />
-                </RNPickerSelect> */}
+              items={[
+                    {value:"Artes", label: "Artes"},
+                    {value:"Historia", label: "Historia"},
+                    {value:"Matematica", label: "Matematica"},
+                    {value:"Ingles", label: "Ingles"},
+                    {value:"Portugues", label: "Portugues"},
+                    {value:"Geografia", label: "Geografia"},
+                    {value:"Biologia", label: "Biologia"},
+                    {value:"Fisica", label: "Fisica"},
+                    {value:"Quimica", label: "Quimica"},
+                    {value:"Educacao Fisica", label: "Educacao Fisica"},
+                ]}
+              placeholder="Materia"
+              onChangeItem={(value) => setSubject(value.value)}
+              defaultValue={subject}
+              containerStyle={{height: 64, marginBottom: 16}}
+            />
 
             <Label>Custo da sua hora por aula</Label>
-            <Input placeholder="Custo da sua hora" inputForm />
+            <Input
+              placeholder="Custo da sua hora"
+              inputForm
+              value={cost}
+              onChangeText={value => setCost(value)}
+            />
           </ClassesContent>
 
           <ScheduleContent>
@@ -149,37 +293,43 @@ const Profile: React.FC = () => {
             </HeaderScheduleContent>
             {scheduleItems.map((schedule, index) => (
               <ScheduleItem key={index}>
-                {/* <RNPickerSelect
-                onValueChange={(itemValue, itemIndex) =>
-                    setWeekday(String(itemValue))
-                }
-                items={[
-                    { value: '0', label: 'Domingo'},
-                    { value: '1', label: 'Segunda-Feira'},
-                    { value: '2', label: 'Terca-Feira'},
-                    { value: '3', label: 'Quarta-Feira'},
-                    { value: '4', label: 'Quinta-Feira'},
-                    { value: '5', label: 'Sexta'},
-                    { value: '6', label: 'Sabado'}
-                ]}
-                >
+                <Label>Dia da semana</Label>
+                <PickerItem
 
-                <Input
-                    placeholder="Qual o dia?"
-                    value={week_day}
+                  items={[
+                        {value: 0, label: "Domingo"},
+                        {value: 1, label: "Segunda-Feira"},
+                        {value: 2, label: "Terca-Feira"},
+                        {value: 3, label: "Quarta-Feira"},
+                        {value: 4, label: "Quinta-Feira"},
+                        {value: 5, label: "Sexta-Feira"},
+                        {value: 6, label: "Sábado"},
+                    ]}
+                  placeholder="Dia da semana"
+                  defaultValue={schedule.week_day}
+                  containerStyle={{height: 64, marginBottom: 8}}
+                  onChangeItem={(value) => setScheduleItemValue(index, 'week_day', value.value)}
                 />
-            </RNPickerSelect> */}
                 <ScheduleContentInput>
 
                   <GridInput>
                     <InputContent>
                       <Label>Das</Label>
-                      <Input inputForm />
+                      <Input
+                        onChangeText={value => setScheduleItemValue(index, 'from', value)}
+                        inputForm
+                        placeholder="Horario"
+                      />
                     </InputContent>
 
                     <InputContent>
                       <Label>Ate</Label>
-                      <Input inputForm shortInput />
+                      <Input
+                        onChangeText={value => setScheduleItemValue(index, 'to', value)}
+                        selectInput
+                        shortInput
+                        placeholder="Horario"
+                      />
                     </InputContent>
                   </GridInput>
 
@@ -194,7 +344,7 @@ const Profile: React.FC = () => {
           </ScheduleContent>
 
           <Footer>
-            <SubmitButton>
+            <SubmitButton onPress={handleSubmit}>
               <SubmitButtonText>Salvar alterações</SubmitButtonText>
             </SubmitButton>
           </Footer>

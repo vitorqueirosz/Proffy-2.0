@@ -13,7 +13,7 @@ export const Header = styled.View`
     margin: 48px 0 80px 32px;
 `;
 export const InfoContent = styled.View`
-    margin-bottom: 128px;
+    margin-bottom: 104px;
 `;
 export const Title = styled.Text`
     font-size: 32px;

@@ -9,8 +9,8 @@ const { Navigator, Screen } = createBottomTabNavigator();
 
 const StudyTabs: React.FC = () => {
   return (
-      <Navigator
-        tabBarOptions={{
+    <Navigator
+      tabBarOptions={{
             tabStyle: {
                 height: 64,
                 flexDirection: 'row',
@@ -18,15 +18,16 @@ const StudyTabs: React.FC = () => {
                 justifyContent: 'center'
             }
         }}
-      
-      >
-          <Screen name="TeacherList" component={TeacherList}
-          options={{
+    >
+      <Screen
+        name="TeacherList"
+        component={TeacherList}
+        options={{
               tabBarLabel: 'Proffys'
           }}
-          />
-          <Screen name="Favorites" component={Favorites}/>
-      </Navigator>
+      />
+      <Screen name="Favorites" component={Favorites} />
+    </Navigator>
   )
 }
 

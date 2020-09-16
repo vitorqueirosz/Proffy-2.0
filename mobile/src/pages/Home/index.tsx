@@ -1,9 +1,10 @@
-import React from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 
 import Icon from 'react-native-vector-icons/Feather';
 
 import { useNavigation } from '@react-navigation/native';
-import iconProfile from '../../assets/images/icons/heart.png';
+
+import profilePicture from '../../assets/images/profilePic.jpg';
 
 import studyIcon from '../../assets/images/icons/study.png';
 import giveClassesIcon from '../../assets/images/icons/give-classes.png';
@@ -33,21 +34,43 @@ import {
     ConectionsTitle
 
  } from './styles';
+import { useAuth } from '../../components/hooks/AuthContext';
+import api from '../../services/api';
+
+interface User {
+    name: string;
+    avatar: string;
+    bio: string;
+}
 
 const Home: React.FC = () => {
 
- const navigation = useNavigation();
+    const navigation = useNavigation();
+    const { signOut, user } = useAuth();
+    const [data, setData] = useState({} as User);
+
+    const handleSignOut = useCallback(() => {
+        signOut();
+    }, [signOut]);
+
+    useEffect(() => {
+
+    }, []);
+
+
+    console.log(user.avatar);
+
 
   return (
     <Container>
       <TopContent>
         <Header>
           <ProfileContent onPress={() => navigation.navigate('Profile')}>
-            <ProfilePic source={iconProfile} />
-            <NameText>Vitor Queiroz</NameText>
+            <ProfilePic source={{uri: `http://192.168.0.119:3333/files/${user?.avatar}`} || profilePicture} />
+            <NameText>{user.name}</NameText>
           </ProfileContent>
 
-          <LogoutButton>
+          <LogoutButton onPress={handleSignOut}>
             <Icon name="power" size={20} color="#D4C2FF" />
           </LogoutButton>
         </Header>
