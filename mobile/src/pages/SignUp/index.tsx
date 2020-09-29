@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 
 import Icon from "react-native-vector-icons/Feather";
 import { KeyboardAvoidingView, Platform } from "react-native";
@@ -25,6 +25,10 @@ const SignUp: React.FC = () => {
     const [whatsapp, setWhatsapp] = useState<string>();
 
 
+    const handleInputChangeText = useCallback((value: string) => {
+        setWhatsapp(value);
+        console.log(value)
+    }, []);
 
     return (
       <>
@@ -59,7 +63,10 @@ const SignUp: React.FC = () => {
                 placeholder="Whatsapp"
                 value={whatsapp}
                 bottomInput
-                onChangeText={value => setWhatsapp(value)}
+                secureTextEntry={false}
+                mask="phone"
+                maxLength={14}
+                inputMaskChange={(text: string) => setWhatsapp(text)}
               />
 
               <NextButton

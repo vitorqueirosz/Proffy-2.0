@@ -59,15 +59,9 @@ interface User {
     whatsapp: string;
     bio: string;
 }
-
-interface UpdatedUserData {
-    bio: string;
-}
-
-
 const Profile: React.FC = () => {
 
-    const { updateUserData, user } = useAuth();
+    const { user } = useAuth();
 
     const [data, setData] = useState({} as User);
     const [subject, setSubject] = useState('');
@@ -81,13 +75,14 @@ const Profile: React.FC = () => {
 
     useEffect(() => {
         api.get('/users').then(response => {
-            const { user } = response.data;
+            // const { user } = response.data;
 
-            setData(user);
+            setData(response.data.user);
             setBio(user.bio);
+
+            console.log(user.avatar);
         });
 
-        console.log(bio);
 
     }, [bio]);
 
@@ -150,13 +145,13 @@ const Profile: React.FC = () => {
     const handleSubmit = useCallback( async () => {
 
 
-        // const classesData = {
-        //     subject,
-        //     scheduleItems,
-        //     cost
-        // };
+        const classesData = {
+            subject,
+            schedule: scheduleItems,
+            cost: Number(cost),
+        };
 
-        // await api.post('/classes', classesData);
+        await api.post('/classes', classesData);
 
         const formData = new FormData();
 
@@ -172,18 +167,18 @@ const Profile: React.FC = () => {
 
         await api.patch('/users/profile', formData);
 
-        await updateUserData({
-            id: user.id,
-            name: user.name,
-            email: user.email,
-            avatar,
-            bio,
-            whatsapp: data.whatsapp,
-        });
+        // await updateUserData({
+        //     id: user.id,
+        //     name: user.name,
+        //     email: user.email,
+        //     avatar,
+        //     bio,
+        //     whatsapp: data.whatsapp,
+        // });
 
 
 
-    }, [avatar, bio, subject, cost, scheduleItems]);
+    }, [avatar, bio, subject, cost, scheduleItems, user.id]);
 
 
   return (
@@ -206,7 +201,7 @@ const Profile: React.FC = () => {
               <ImageButtonSelect source={camIcon} />
             </SelectButtonImage>
 
-            <NameTitle>{user.name}</NameTitle>
+            <NameTitle>{data.name}</NameTitle>
           </TopContent>
 
         </PageHeader>
@@ -221,22 +216,21 @@ const Profile: React.FC = () => {
             <Input
               placeholder="Nome"
               inputForm
-              value={user.name}
+              value={data.name}
             />
 
             <Label>E-mail</Label>
             <Input
               placeholder="E-mail"
               inputForm
-              value={user.email}
+              value={data.email}
             />
 
             <Label>Whatsapp</Label>
             <Input
               placeholder="Whatsapp"
               inputForm
-
-              value={user.whatsapp}
+              value={data.whatsapp}
             />
 
             <Label>Biografia</Label>
@@ -291,7 +285,7 @@ const Profile: React.FC = () => {
                 <NewScheduleTitle>+ Novo</NewScheduleTitle>
               </NewScheduleButton>
             </HeaderScheduleContent>
-            {scheduleItems.map((schedule, index) => (
+            {scheduleItems.map((schedule, index: number) => (
               <ScheduleItem key={index}>
                 <Label>Dia da semana</Label>
                 <PickerItem
@@ -318,6 +312,7 @@ const Profile: React.FC = () => {
                       <Input
                         onChangeText={value => setScheduleItemValue(index, 'from', value)}
                         inputForm
+                        inputTime
                         placeholder="Horario"
                       />
                     </InputContent>
@@ -326,7 +321,7 @@ const Profile: React.FC = () => {
                       <Label>Ate</Label>
                       <Input
                         onChangeText={value => setScheduleItemValue(index, 'to', value)}
-                        selectInput
+                        inputTime
                         shortInput
                         placeholder="Horario"
                       />

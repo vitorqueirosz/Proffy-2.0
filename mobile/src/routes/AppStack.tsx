@@ -9,6 +9,7 @@ import Profile from '../pages/Profile';
 import GiveClasses from '../pages/GiveClasses';
 import StudyTabs from './TabNav';
 import { useAuth } from '../components/hooks/AuthContext';
+import ModalSuccess from '../components/ModalSuccess';
 
 const { Navigator, Screen } = createStackNavigator();
 
@@ -34,6 +35,7 @@ const AppRoutes: React.FC = () => {
         <Screen name="PasswordSignUp" component={PasswordSignUp} />
         <Screen name="Profile" component={Profile} />
         <Screen name="GiveClasses" component={GiveClasses} />
+        <Screen name="Done" component={ModalSuccess} />
         <Screen name="study" component={StudyTabs} />
       </Navigator>
     </NavigationContainer>

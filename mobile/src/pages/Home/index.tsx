@@ -53,9 +53,9 @@ const Home: React.FC = () => {
         signOut();
     }, [signOut]);
 
-    useEffect(() => {
+    // useEffect(() => {
 
-    }, []);
+    // }, []);
 
 
     console.log(user.avatar);

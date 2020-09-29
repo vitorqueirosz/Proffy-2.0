@@ -6,6 +6,7 @@ interface ContainerInputProps {
     inputForm: boolean;
     textArea: boolean;
     shortInput: boolean;
+    inputTime: boolean;
     selectInput: boolean;
 }
 
@@ -66,6 +67,17 @@ export const Container = styled.View<ContainerInputProps>`
         border-top-right-radius: 0px; */
         border-radius: 8px;
         background: #FAFAFC;
+        height: 54px;
+        border-width: 1px;
+        border-color: #E6E6F0;
+    ` }
+
+    ${props => props.inputTime && css `
+        /* border-top-left-radius: 0px;
+        border-top-right-radius: 0px; */
+        border-radius: 8px;
+        background: #FAFAFC;
+        height: 54px;
         border-width: 1px;
         border-color: #E6E6F0;
     ` }

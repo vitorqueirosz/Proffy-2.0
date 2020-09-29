@@ -1,6 +1,8 @@
 import React, { createContext, useContext, useCallback, useState, useEffect } from 'react';
 
 import AsyncStorage from '@react-native-community/async-storage';
+import  { Teacher } from "../TeacherItem";
+
 
 import api from '../../services/api';
 
@@ -25,14 +27,21 @@ interface User {
     bio: string;
 }
 
+interface TeacherData {
+    teacher: Teacher;
+    favorited: boolean;
+}
+
 interface AuthContextData {
     user: User;
     signIn(credentials: SignInCredentials): Promise<void>;
     signOut(): void;
     signUp(credentials: signUpCredentials): Promise<void>;
     handleVisibleFilter(): void;
+    handleToggleFavorites(teacherData: TeacherData): Promise<void>;
     updateUserData(user: User): Promise<void>;
     isVisible: boolean;
+    isFavorited: boolean;
 }
 interface AuthData {
     user: User;
@@ -43,6 +52,7 @@ const AuthContext = createContext({} as AuthContextData);
 const AuthProvider: React.FC = ({ children }) => {
     const [data, setData] = useState({} as AuthData);
     const [isVisible, setIsVisible] = useState<boolean>(false);
+    const [isFavorited, setIsFavorited] = useState<boolean>(false);
 
     useEffect(() => {
 
@@ -118,6 +128,34 @@ const AuthProvider: React.FC = ({ children }) => {
         setIsVisible(!isVisible);
     }, [isVisible]);
 
+    const handleToggleFavorites = useCallback( async ({ teacher, favorited }) => {
+
+        const favorites = await AsyncStorage.getItem('favorites');
+
+        if (favorited) {
+            setIsFavorited(true);
+        }
+
+        let favoritesArray = [];
+
+        if (favorites) {
+            favoritesArray = JSON.parse(favorites);
+        }
+
+        if (isFavorited) {
+            const favoritedIndex = favoritesArray.findIndex((item: Teacher) => item.id === teacher.id);
+            favoritesArray.splice(favoritedIndex, 1);
+
+            setIsFavorited(false);
+        }
+        else {
+            favoritesArray.push(teacher);
+            setIsFavorited(true);
+        }
+
+        await AsyncStorage.setItem('favorites', JSON.stringify(favoritesArray));
+     }, [isFavorited]);
+
 
   return (
     <AuthContext.Provider value={{
@@ -126,8 +164,10 @@ const AuthProvider: React.FC = ({ children }) => {
          user: data.user,
          signOut,
          handleVisibleFilter,
+         handleToggleFavorites,
          updateUserData,
-         isVisible }}
+         isVisible,
+         isFavorited }}
     >
       {children}
     </AuthContext.Provider>

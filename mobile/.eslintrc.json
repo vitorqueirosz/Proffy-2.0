@@ -29,6 +29,7 @@
         "react/jsx-props-no-spreading": "off",
         "no-param-reassign": [2, { "props": false }],
         "no-unused-expressions": "off",
+        "no-nested-ternary": "off",
         "camelcase": "off",
         "react/prop-types": "off",
         "react-hooks/exhaustive-deps": "warn",

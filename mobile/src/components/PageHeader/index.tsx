@@ -6,18 +6,26 @@ import { useNavigation } from '@react-navigation/native';
 import logoImg from '../../assets/images/logo.png';
 
 import {
-  Container, Header, PageTitle,Content, Title, SearchTeachers, Logo, ButtonSearchTeachers, SeachTeachersTitle, SearchContent
+  Container,
+  Header,
+  PageTitle,
+  Content,
+  Title,
+  SubTitle,
+  SearchTeachers, Logo, ButtonSearchTeachers, SeachTeachersTitle, SearchContent
 } from './styles';
+
 import { useAuth } from '../hooks/AuthContext';
 
 interface PageHeaderProps {
     pageTitle: string;
     title?: string;
     filter?: boolean;
+    subTitle?: string;
 }
 
 const PageHeader: React.FC<PageHeaderProps> = ({
-  pageTitle, title, filter, children,
+  pageTitle, title, filter, children, subTitle,
 }) => {
 
     const navigation = useNavigation();
@@ -41,8 +49,14 @@ const PageHeader: React.FC<PageHeaderProps> = ({
         {title && (
           <Content>
 
-            <Title>{title}</Title>
+            <Title subTitle={subTitle}>{title}</Title>
 
+            {subTitle && (
+            <SubTitle>
+              {subTitle}
+
+            </SubTitle>
+            )}
 
 
             {filter && (
